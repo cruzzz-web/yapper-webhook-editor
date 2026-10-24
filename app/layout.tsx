@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: 'Yaphook — Webhook Editor',
   description: 'Create, preview, and send rich webhook messages with Yaphook.',
   generator: 'v0.app',
+  icons: {
+    icon: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yaphook%20logo-kl9YHmJ75buGiFcareIXOC5JZypZjY.png',
+    shortcut: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yaphook%20logo-kl9YHmJ75buGiFcareIXOC5JZypZjY.png',
+  },
 }
 
 export const viewport: Viewport = {
