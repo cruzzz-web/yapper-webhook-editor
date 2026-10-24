@@ -133,5 +133,8 @@ body { transition: background-color .18s ease, color .18s ease; }
 @media (max-width:1100px) { .workspace { display:block; }.message-rail, .left-panel, .editor-panel, .preview-panel { display:block; }.message-rail { border-right:0; border-bottom:1px solid var(--border); }.preview-panel { border-left:0; border-top:1px solid var(--border); position:static; height:auto; max-height:none; } }
 @media (max-width:760px) { .workspace { display:block; }.message-rail, .left-panel, .editor-panel, .preview-panel { display:block; padding:18px 14px 28px; }.message-rail { border-bottom:1px solid var(--border); }.message-rail .message-list { flex-direction:row; overflow:auto; }.message-rail .message-tab { min-width:185px; }.left-panel > .message-list, .left-panel > .add-message { display:none; } }
 
+/* Desktop proportions: fixed message rail, roomy editor, flexible preview. */
+@media (min-width:1101px) { .workspace { grid-template-columns:250px 260px minmax(0,1.5fr) minmax(320px,1fr); max-width:none; }.message-rail { grid-column:1; }.left-panel { grid-column:2; min-width:0; }.editor-panel { grid-column:3; min-width:0; }.preview-panel { grid-column:4; min-width:0; }.editor-toolbar { flex-wrap:nowrap; }.toolbar-actions { flex-shrink:0; white-space:nowrap; }.toolbar-actions button { white-space:nowrap; } }
+
 .preview-panel .discord-preview { min-height:0; height:max-content; }
-@media (min-width:1101px) { .workspace > .editor-panel { grid-column:2; grid-row:1 / span 3; min-width:0; overflow:auto; }.workspace > .preview-panel { grid-column:3; grid-row:1 / span 3; } }
+@media (min-width:1101px) { .workspace > .editor-panel { grid-column:3; grid-row:1; min-width:0; overflow:auto; }.workspace > .preview-panel { grid-column:4; grid-row:1; } }
