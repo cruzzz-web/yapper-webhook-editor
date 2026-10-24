@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server'
 
-const DISCORD_WEBHOOK = /^https:\/\/discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+$/
+const YAPIN_WEBHOOK = /^https:\/\/(?:www\.)?yapin\.gg\/api\/webhooks\/[A-Za-z0-9_-]+\/[A-Za-z0-9._~-]+$/
 
 function getUrl(body: unknown) {
   const url = typeof body === 'object' && body !== null && 'url' in body ? (body as { url?: unknown }).url : undefined
-  if (typeof url !== 'string' || !DISCORD_WEBHOOK.test(url)) throw new Error('Enter a valid Discord webhook URL.')
+  if (typeof url !== 'string' || !YAPIN_WEBHOOK.test(url)) throw new Error('Enter a valid Yapin webhook URL.')
   return url
 }
 
-async function discord(url: string, init?: RequestInit) {
+async function yapin(url: string, init?: RequestInit) {
   const response = await fetch(url, { ...init, cache: 'no-store' })
   const data = await response.json().catch(() => null)
   if (!response.ok) {
-    const message = typeof data?.message === 'string' ? data.message : 'Discord rejected the request.'
+    const message = typeof data?.message === 'string' ? data.message : typeof data?.error === 'string' ? data.error : 'Yapin rejected the request.'
     const error = new Error(message) as Error & { status?: number; retryAfter?: number }
     error.status = response.status
-    error.retryAfter = typeof data?.retry_after === 'number' ? data.retry_after : undefined
+    error.retryAfter = Number(response.headers.get('retry-after')) || undefined
     throw error
   }
   return data
@@ -25,14 +25,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const url = getUrl(body)
-    if (body.action === 'load') {
-      const webhook = await discord(`${url}?with_counts=false`)
-      return NextResponse.json({ id: webhook.id, name: webhook.name, avatar: webhook.avatar, type: webhook.type })
-    }
+    if (body.action === 'load') return NextResponse.json({ connected: true })
     if (body.action === 'send') {
       const payload = body.payload
       if (!payload || typeof payload !== 'object') throw new Error('Message payload is required.')
-      await discord(`${url}?wait=true`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+      await yapin(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
       return NextResponse.json({ sent: true })
     }
     return NextResponse.json({ error: 'Unsupported webhook action.' }, { status: 400 })
