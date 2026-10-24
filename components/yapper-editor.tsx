@@ -61,9 +61,27 @@ export default function YapperEditor() {
   useEffect(() => { if (!hydrated) return; localStorage.setItem('yapper-draft', JSON.stringify(messages)); if (!jsonDirty.current) setJson(JSON.stringify(messages, null, 2)); setDirty(true) }, [messages, hydrated])
   useEffect(() => { const warn = (event: BeforeUnloadEvent) => { if (dirty) { event.preventDefault(); event.returnValue = '' } }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn) }, [dirty])
   const commit = (next: Message[]) => { setMessages(next); setJson(JSON.stringify(next, null, 2)); jsonDirty.current = false; setIssues([]) }
-  const updateMessage = (patch: Partial<Message>) => commit(messages.map((item, i) => i === active ? { ...item, ...patch } : item))
-  const updateEmbed = (ei: number, patch: Partial<Embed>) => updateMessage({ embeds: message.embeds.map((embed, i) => i === ei ? { ...embed, ...patch } : embed) })
-  const updateField = (ei: number, fi: number, patch: Partial<EmbedField>) => updateEmbed(ei, { fields: message.embeds[ei].fields.map((field, i) => i === fi ? { ...field, ...patch } : field) })
+  const updateMessage = (patch: Partial<Message> | ((current: Message) => Partial<Message>)) => {
+    setMessages(current => current.map((item, i) => {
+      if (i !== active) return item
+      const changes = typeof patch === 'function' ? patch(item) : patch
+      return { ...item, ...changes }
+    }))
+    jsonDirty.current = false
+    setIssues([])
+  }
+  const updateEmbed = (ei: number, patch: Partial<Embed> | ((current: Embed) => Partial<Embed>)) => updateMessage(current => {
+    const embed = current.embeds[ei]
+    if (!embed) return {}
+    const changes = typeof patch === 'function' ? patch(embed) : patch
+    return { embeds: current.embeds.map((item, i) => i === ei ? { ...item, ...changes } : item) }
+  })
+  const updateField = (ei: number, fi: number, patch: Partial<EmbedField> | ((current: EmbedField) => Partial<EmbedField>)) => updateEmbed(ei, embed => {
+    const field = embed.fields[fi]
+    if (!field) return {}
+    const changes = typeof patch === 'function' ? patch(field) : patch
+    return { fields: embed.fields.map((item, i) => i === fi ? { ...item, ...changes } : item) }
+  })
   const reorder = <T,>(items: T[], index: number, direction: -1 | 1) => { const next = index + direction; if (next < 0 || next >= items.length) return items; const copy = [...items]; [copy[index], copy[next]] = [copy[next], copy[index]]; return copy }
   const addEmbed = () => updateMessage({ embeds: [...message.embeds, blankEmbed()] })
   const editJson = (value: string) => { setJson(value); jsonDirty.current = true; setDirty(true); try { const parsed = JSON.parse(value); const found = validateMessages(parsed); setIssues(found); if (!found.length) { const next = normalizeMessages(parsed); setMessages(next); setActive(i => Math.min(i, Math.max(0, next.length - 1))) } } catch { setIssues([{ path: '$', message: 'JSON is incomplete or has a syntax error.' }]) } }
