@@ -20,6 +20,31 @@ function Panel({ title, description, children }: { title: string; description?: 
 export default function YapperEditor() {
   const [messages, setMessages] = useState<Message[]>(starter), [active, setActive] = useState(0), [mode, setMode] = useState<'visual' | 'json'>('visual'), [json, setJson] = useState(JSON.stringify(starter, null, 2)), [issues, setIssues] = useState(''), [section, setSection] = useState<'Editor' | 'Guide' | 'Settings'>('Editor'), [theme, setTheme] = useState<Theme>('system'), [webhookUrl, setWebhookUrl] = useState(''), [webhook, setWebhook] = useState<{ name: string; avatar?: string } | null>(null), [webhookError, setWebhookError] = useState(''), [busy, setBusy] = useState<'load' | 'send' | ''>(''), [notice, setNotice] = useState('')
   const message = messages[active] ?? blankMessage()
+  const [collapsedEmbeds, setCollapsedEmbeds] = useState<Record<string, boolean>>({})
+  const toggleEmbed = (ei: number) => setCollapsedEmbeds(current => { const key = `${active}:${ei}`; return { ...current, [key]: !current[key] } })
+  useEffect(() => {
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.embed-editor .embed-editor-head .icon-button[aria-label]'))
+    const handlers = buttons.map((button, ei) => {
+      const handleClick = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); toggleEmbed(ei) }
+      button.addEventListener('click', handleClick)
+      return () => button.removeEventListener('click', handleClick)
+    })
+    return () => handlers.forEach(cleanup => cleanup())
+  }, [active, message.embeds.length])
+  useEffect(() => {
+    document.querySelectorAll<HTMLElement>('.embed-editor').forEach((card, ei) => {
+      const collapsed = Boolean(collapsedEmbeds[`${active}:${ei}`])
+      card.classList.toggle('is-collapsed', collapsed)
+      Array.from(card.children).slice(1).forEach(child => { (child as HTMLElement).hidden = collapsed })
+      const button = card.querySelector<HTMLButtonElement>('.embed-editor-head .icon-button[aria-label]')
+      if (button) {
+        button.setAttribute('aria-label', collapsed ? 'Expand embed' : 'Collapse embed')
+        button.setAttribute('aria-expanded', String(!collapsed))
+        const icon = button.querySelector<SVGElement>('svg')
+        if (icon) icon.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)'
+      }
+    })
+  }, [active, collapsedEmbeds, message.embeds.length])
   useEffect(() => { try { const saved = localStorage.getItem('yapper-draft-v2'); if (saved) { const raw = JSON.parse(saved); const next = normalize(raw.messages ?? raw); setMessages(next); setJson(JSON.stringify(next, null, 2)); setActive(Math.min(raw.active ?? 0, next.length - 1)) }; const savedTheme = localStorage.getItem('yapper-theme') as Theme; if (['system', 'light', 'dark'].includes(savedTheme)) setTheme(savedTheme) } catch {} }, [])
   useEffect(() => { const root = document.documentElement; const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches); root.classList.toggle('dark', dark); root.dataset.theme = theme; localStorage.setItem('yapper-theme', theme) }, [theme])
   useEffect(() => { localStorage.setItem('yapper-draft-v2', JSON.stringify({ version: 1, messages, active })); setJson(JSON.stringify(messages, null, 2)) }, [messages, active])
