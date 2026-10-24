@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Yapper — Webhook Editor',
-  description: 'Create, preview, and export rich webhook messages with Yapper.',
+  title: 'Yaphook — Webhook Editor',
+  description: 'Create, preview, and send rich webhook messages with Yaphook.',
   generator: 'v0.app',
 }
 

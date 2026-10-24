@@ -39,7 +39,7 @@
 body { transition: background-color .18s ease, color .18s ease; }
 .app-shell { background: radial-gradient(circle at 70% -20%, rgba(255,107,74,.12), transparent 32rem), var(--background); }
 .topbar { background: color-mix(in srgb, var(--background) 88%, transparent); }
-.brand-mark { background: linear-gradient(135deg, #ff8a70, #ff5a35); }
+.brand-mark { overflow:hidden; background:#ff6b4a; }.brand-mark img { width:100%; height:100%; object-fit:cover; }
 .eyebrow, .message-number { color: var(--accent); }
 .nav-item.active:after { background: var(--accent); }
 .nav-item.active, .nav-item:hover, .link-button, .add-message { color: var(--accent); }
