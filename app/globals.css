@@ -66,7 +66,7 @@ body { transition: background-color .18s ease, color .18s ease; }
 .form-field { display:flex; flex-direction:column; gap:7px; min-width:0; }
 .form-label { display:flex; justify-content:space-between; gap:8px; font-size:12px; font-weight:650; color:var(--foreground); }
 .form-label small { color:var(--muted-foreground); font-size:10px; font-weight:400; }
- .form-field input, .form-field textarea, .color-input input:last-child { width:100%; border:1px solid var(--border); border-radius:8px; background:var(--input); color:var(--foreground); padding:10px 11px; outline:none; transition:border-color .15s, box-shadow .15s; } .webhook-connect { min-width:0; } .webhook-connect > input { display:block; width:100%; min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ .form-field input, .form-field textarea, .color-input input:last-child { width:100%; border:1px solid var(--border); border-radius:8px; background:var(--input); color:var(--foreground); padding:10px 11px; outline:none; transition:border-color .15s, box-shadow .15s; } .webhook-connect { min-width:0; }.add-webhook-only { margin-top:2px; }
 .form-field textarea { min-height:104px; resize:vertical; line-height:1.45; }
 .form-field input:focus, .form-field textarea:focus, .color-input input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
 .editor-card > .form-field { margin-top:18px; }
